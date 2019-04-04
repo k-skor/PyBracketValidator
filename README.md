@@ -1,0 +1,1 @@
+ZADANIE: Korzystając z Pythona przygotuj skrypt, który będzie sprawdzał poprawność zapisu wzoru matematycznego pod względem zamykania i otwierania nawiasów (, ), {, }. Wejście skryptu: 2 * (y^{(x + 2) * 6}) Wynik działania: True
