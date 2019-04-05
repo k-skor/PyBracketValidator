@@ -2,57 +2,81 @@
 
 import sys
 
-class Bracket:
+bracketChars = "(){}"
+
+class BracketPair:
     def __init__(self):
-        print("++ Bracket ++")
-        self.startIdx_ = 0
-        self.endIdx_ = 0
+        self.opened = False
 
-    def empty(self):
-        return self.startIdx_ == 0 and self.endIdx_ == 0
+    def open(self):
+        if self.opened:
+            return False
+        self.opened = True
+        return True
 
-    def open(self,startIdx):
-        self.startIdx_ = startIdx
+    def close(self):
+        if not self.opened:
+            return False
+        self.opened = False
+        return True
 
-    def close(self,endIdx):
-        self.endIdx_ = endIdx
+class DefaultBracketPair(BracketPair):
+    def handleBracket(self, char):
+        if char == "(":
+            return self.open()
+        elif char == "{":
+            return False
+        elif char == ")":
+            return self.close()
+        elif char == "}":
+            return False
 
-class DefaultBracket(Bracket):
-    pass
+class CurlyBracketPair(BracketPair):
+    def handleBracket(self, char):
+        if char == "(":
+            return False
+        elif char == "{":
+            return self.open()
+        elif char == ")":
+            return False
+        elif char == "}":
+            return self.close()
 
-class CurlyBracket(Bracket):
-    pass
+def handleChar(char):
+    if char == "(" or char == ")":
+        return DefaultBracketPair()
+    elif char == "{" or char == "}":
+        return CurlyBracketPair()
+    else:
+        return None
 
 def validate(expr):
     startIdx = 0;
-    endIdx = len(expr) - 1
-    defaultBracketCheck = Bracket()
-    curlyBracketCheck = Bracket()
-    print("end idx: {}").format(endIdx)
+    endIdx = len(expr)
+    brPair = None
+    idx = 0
     while (startIdx != endIdx):
-        if expr[startIdx] == "(":
-            defaultBracketCheck.open(startIdx)
-        elif expr[endIdx] == ")":
-            if not curlyBracketCheck.empty():
-                break
-            defaultBracketCheck.close(endIdx)
 
-        if expr[startIdx] == "{":
-            curlyBracketCheck.open(startIdx)
-        elif expr[endIdx] == "}":
-            if not defaultBracketCheck.empty():
-                break
-            curlyBracketCheck.close(endIdx)
+        if expr[idx] in bracketChars:
+            if brPair is None or not brPair.opened:
+                brPair = handleChar(expr[idx])
+            if brPair is not None:
+                if not brPair.handleBracket(expr[idx]):
+                    return False
 
-        if defaultBracketCheck.empty() and defaultBracketCheck.empty():
+        if brPair is None or not brPair.opened:
             startIdx = startIdx + 1
+            idx = startIdx
         else:
             endIdx = endIdx - 1
-        
+            idx = endIdx
+    return True
+
 
 def main():
-    print("args: {}").format(sys.argv)
-    validate(sys.argv[1])
+    ret = validate(sys.argv[1])
+    print(ret)
+    return ret
 
 if __name__ == "__main__":
     main()
